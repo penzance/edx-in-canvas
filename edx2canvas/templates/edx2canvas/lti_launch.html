@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body onload="document.createElement('form').submit.call(document.getElementById('lti_launch_form'))">
+
+<form action="{{lti_url}}" method="POST" id="lti_launch_form" name="lti_launch_form">
+    <input id="lti_version" name="lti_version" type="hidden" value="{{lti_version}}" />
+    <input id="tool_consumer_instance_guid" name="tool_consumer_instance_guid" type="hidden" value="{{tool_consumer_instance_guid}}" />
+    <input id="user_id" name="user_id" type="hidden" value="{{user_id}}" />
+    <input id="roles" name="roles" type="hidden" value="{{roles}}" />
+    <input id="context_id" name="context_id" type="hidden" value="{{context_id}}" />
+    <input id="oauth_consumer_key" name="oauth_consumer_key" type="hidden" value="{{oauth_consumer_key}}" />
+
+    <input id="oauth_signature_method" name="oauth_signature_method" type="hidden" value="{{oauth_signature_method}}" />
+    <input id="oauth_timestamp" name="oauth_timestamp" type="hidden" value="{{oauth_timestamp}}" />
+    <input id="oauth_nonce" name="oauth_nonce" type="hidden" value="{{oauth_nonce}}" />
+    <input id="oauth_version" name="oauth_version" type="hidden" value="{{oauth_version}}" />
+    <input id="oauth_signature" name="oauth_signature" type="hidden" value="{{oauth_signature}}" />
+</form>
+
+
+</body>
+</html>

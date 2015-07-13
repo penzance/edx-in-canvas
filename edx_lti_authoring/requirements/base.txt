@@ -1,0 +1,11 @@
+Django>=1.7
+ims_lti_py
+requests
+django-cached-authentication-middleware>=0.2.0
+django-crispy-forms
+oauthlib==0.7.2
+ddt
+lxml
+
+git+ssh://git@github.com/penzance/canvas_python_sdk.git@develop#egg=canvas-python-sdk
+git+ssh://git@github.com/penzance/django-auth-lti.git@develop#egg=django-auth-lti

@@ -1,0 +1,28 @@
+{% verbatim %}
+
+<script id="canvas-panel-group-template" type="text/x-handlebars-template">
+<div class="panel-group" id="accordion{{id}}" role="tablist" aria-multiselectable="false">
+    {{#each modules}}
+    <div class="panel panel-default canvas-panel" data-section="">
+        <div class="panel-heading" role="tab" id="heading{{id}}">
+            <h4 class="panel-title">
+                <a class="collapsed" data-toggle="collapse" data-parent="#canvas_accordion"
+                   href="#collapse{{id}}" aria-expanded="false" aria-controls="collapse{{id}}">{{name}}</a>
+            </h4>
+        </div>
+        <div id="collapse{{id}}" class="panel-collapse collapse canvas-collapse" role="tabpanel"
+             aria-labelledby="heading{{id}}">
+            <div class="panel-body" id="panel-body{{id}}" data-module_id="{{id}}">
+                <div class="list-group" id="toList{{id}}" data-id="{{id}}">
+                    {{#each items}}
+                    <div class="list-group-item nav_subsection" id="canvas_module_item_{{id}}">{{title}}</div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+</script>
+
+{% endverbatim %}

@@ -1,0 +1,67 @@
+{% load staticfiles %}
+
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href='{% static "edx2canvas/courses.css" %}'/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
+    <script src="https://rubaxa.github.io/Sortable/Sortable.js"></script>
+    <script src='{% static "edx2canvas/courses.js" %}'></script>
+
+</head>
+<body>
+{% include "edx2canvas/edx-template.html" %}
+{% include "edx2canvas/canvas-template.html" %}
+{% include "edx2canvas/instruction_templates.html" %}
+
+<div id="edx_panel">
+    <div id="edx_class_selector" class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button"
+                data-toggle="dropdown" id="edx_dropdown_button"
+                aria-expanded="true">
+            Select edX Course
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+            {% for course in edx_courses %}
+            <li role="presentation" data-id="{{course.id}}"><a role="menuitem"
+                                                               tabindex="-1"
+                                                               href="#">{{course.title}}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="edx_structure">
+    </div>
+</div>
+
+<iframe id="lti_iframe"></iframe>
+<div id="button_bar">
+    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal"
+            data-target="#autopopulate_modal">
+        Embed Entire Course
+    </button>
+</div>
+
+<div id="populate_progress_bar">
+    <div class="progress">
+        <div id='progress-bar' class="progress-bar" role="progressbar">
+        </div>
+    </div>
+</div>
+
+<div id="canvas_panel">
+    <div id="canvas_structure" data-canvas="{{canvas_modules}}">
+    </div>
+</div>
+
+{% include "edx2canvas/autopopulate_modal.html" %}
+
+</body>
+</html>

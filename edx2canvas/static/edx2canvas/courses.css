@@ -1,0 +1,63 @@
+.panel-title {
+    font-size: 10pt;
+}
+
+.course_structure {
+    width: 400px;
+    float: left;
+}
+
+#edx_panel {
+    position: absolute;
+    width: 250px;
+    height: 100%;
+    left: 5px;
+}
+
+#lti_iframe {
+    width: calc(100% - 510px);
+    height: calc(100% - 35px);
+    position: absolute;
+    left: 255px;
+}
+
+#canvas_panel {
+    position: absolute;
+    width: 250px;
+    height: 100%;
+    right: 0px;
+}
+
+#button_bar {
+    position: absolute;
+    height: 35px;
+    bottom: 0;
+    width: calc(100% - 510px);
+    left: 255px;
+}
+
+#populate_progress_bar {
+    position: absolute;
+    height: 35px;
+    bottom: 0;
+    width: calc(100% - 510px);
+    left: 255px;
+}
+
+.nav_subsection {
+    font-size: 9pt;
+}
+
+.glyphicon-search {
+    position: absolute;
+    right: 3px;
+    top: 10px;
+}
+
+.highlighted_element {
+    background-color: #aaaaaa;
+}
+
+#tutorial_modal {
+    /*visibility: hidden;*/
+}

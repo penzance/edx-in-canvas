@@ -1,0 +1,29 @@
+'''
+THIS FILE IS AN EXAMPLE ONLY!
+NONE OF THE SETTINGS IN THIS FILE WILL WORK OUT OF THE BOX
+RENAME THIS FILE TO secure.py 
+'''
+SECURE_SETTINGS = {
+    'canvas_domain': 'https://canvas.example.com',
+    'external_tool_domain': 'openedx.example.com',
+    'django_db_user': 'db_administrator_username',
+    'django_db_pass': 'db_administrator_password',
+    'django_secret_key': 'django_secret_key',
+    'lti_oauth_credentials': {
+        'key': 'secret',
+    },
+    'admins': (
+        ('Admin User', 'admin_user@example.com'),
+    ),
+    'edx_url_base': 'https://openedx.example.com',
+    'edx_lti_provider_key': 'provider_key',
+    'edx_lti_provider_secret': 'provider_secret',
+
+    'preview_tool_consumer_guid': 'consumer_guid',
+    'preview_user_id': 'preview_user',
+    'edx_lti_preview_key': 'preview_key',
+    'edx_lti_preview_secret': 'preview_secret',
+
+    'canvas_oauth_client_id': 'oauth_client_id',
+    'canvas_oauth_client_key': 'oauth_client_secret'
+}

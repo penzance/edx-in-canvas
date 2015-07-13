@@ -1,0 +1,62 @@
+{% verbatim %}
+
+<script id="edx-panel-group-template" type="text/x-handlebars-template">
+<div class="panel-group" id="accordion{{id}}" role="tablist" aria-multiselectable="false">
+    {{#each children}}
+    <div class="panel panel-default edx-panel" data-section="">
+        <div class="panel-heading" role="tab" id="heading{{id}}">
+            <h4 class="panel-title">
+                <a class="collapsed" data-toggle="collapse" data-parent="#course_accordion"
+                   href="#collapse{{id}}" aria-expanded="false" aria-controls="collapse{{id}}">
+                    {{display_name}}
+                </a>
+            </h4>
+        </div>
+        <div id="collapse{{id}}" class="panel-collapse collapse" role="tabpanel"
+             aria-labelledby="heading{{id}}">
+            <div class="panel-body" id="panel-body{{id}}">
+                <div class="list-group" id="fromList{{id}}">
+                    {{#each children}}
+                    <div class="list-group-item nav_subsection"
+                         id="subsectionFromList{{id}}"
+                         data-usage_id="{{usage_id}}"
+                         data-course_id="{{../../course_id}}"
+                         data-title="{{display_name}}"
+                         data-type="{{type}}">
+                        <div><span class="glyphicon glyphicon-search subsection_expand" aria-hidden="true"></span>
+                        </div>
+                        {{display_name}}
+                        {{#each children}}
+                        <div class="list-group-item nav_unit"
+                             id="unitFromList{{id}}"
+                             data-usage_id="{{usage_id}}"
+                             data-course_id="{{../../../course_id}}"
+                             data-title="{{ display_name }}"
+                             data-type="{{type}}">
+                            <div><span class="glyphicon glyphicon-search unit_expand" aria-hidden="true"></span>
+                            </div>
+                            {{display_name}}
+                            {{#each children}}
+                            <div class="list-group-item nav_component"
+                                 id="componentFromList{{id}}"
+                                 data-usage_id="{{usage_id}}"
+                                 data-course_id="{{../../../../course_id}}"
+                                 data-title="{{../display_name}} ({{type}})"
+                                 data-type="{{type}}">
+                                <div><span class="glyphicon glyphicon-search component_expand"
+                                           aria-hidden="true"></span></div>
+                                {{type}}
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/each}}
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{/each}}
+</div>
+</script>
+{% endverbatim %}

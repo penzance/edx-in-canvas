@@ -1,0 +1,67 @@
+.panel-title {
+    font-size: 10pt;
+}
+
+.course_structure {
+    width: 400px;
+    float: left;
+}
+
+#dnd_panel {
+    height: 100%;
+    width: 300px;
+}
+
+#edx_panel {
+    position: absolute;
+    width: 300px;
+    height: 50%;
+    left: 5px;
+}
+
+#edx_structure {
+    height: calc(100% - 35px);
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+#canvas_panel {
+    position: absolute;
+    width: 300px;
+    height: 50%;
+    bottom: 0px;
+    left: 5px;
+}
+
+#canvas_structure {
+    height: 100%;
+    overflow: auto;
+    overflow-x: hidden;
+}
+
+#lti_iframe {
+    width: calc(100% - 320px);
+    height: 100%;
+    right: 10px;
+    position: absolute;
+}
+
+.nav_subsection {
+    font-size: 9pt;
+    background-color: #eeeeee;
+}
+
+.nav_unit {
+    background-color: #aaaaaa;
+}
+
+.nav_component {
+    background-color: #222222;
+    color: #eeeeee;
+}
+
+.glyphicon-play-circle {
+    position: absolute;
+    left: 0px;
+    top: 10px;
+}
