@@ -85,14 +85,14 @@ def create_canvas_module_item(
 
 def create_assignment_with_module_item(
         api_auth, title, canvas_course_id,
-        module_id, position, external_tool_id, external_url
+        module_id, position, external_tool_id, external_url, points
 ):
     context = _get_context(api_auth)
     response = assignments.create_assignment(
         context, canvas_course_id, title, 'external_tool',
         assignment_external_tool_tag_attributes={'url': external_url},
         assignment_integration_id=external_tool_id,
-        assignment_points_possible=1
+        assignment_points_possible=points
     )
     assignment_id = response.json()['id']
 

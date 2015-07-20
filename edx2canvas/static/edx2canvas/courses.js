@@ -171,9 +171,11 @@ function addToCanvas(data) {
 function initializeAutopopulation() {
     $('#autopopulate_modal_instructions').html($("#autopopulate_overview").html())
     $('#auto_populate_button').on('click', function () {
+        var createAssignments = $("#create_assignments").is(':checked')
+        console.log("Populating. Creating assignments: " + createAssignments);
         var granularity = $("#autopopulate_granularity").find(".selected_granularity").prop('value')
         if (granularity != undefined) {
-            autoPopulate(".nav_" + granularity)
+            autoPopulate(".nav_" + granularity, createAssignments)
         }
     })
     $("#autopopulate_granularity").find(".btn").on('click', function () {
@@ -184,7 +186,7 @@ function initializeAutopopulation() {
     })
 }
 
-function autoPopulate(leafSelector) {
+function autoPopulate(leafSelector, createAssignments) {
     totalCalls = 0;
     $('.edx-panel').each(function () {
         var name = $(this).find('a').html().trim();
@@ -213,13 +215,13 @@ function autoPopulate(leafSelector) {
                 type: "POST",
                 url: "/lti_tools/edx2canvas/create_canvas_module",
                 data: module_data,
-                success: autoPopulateChildren($(this), leafSelector)
+                success: autoPopulateChildren($(this), leafSelector, createAssignments)
             });
         }
     })
 }
 
-function autoPopulateChildren(parent, leafSelector) {
+function autoPopulateChildren(parent, leafSelector, createAssignments) {
     return function (response) {
         updateProcess();
         populateCanvasCourse(response, null, true);
@@ -236,7 +238,8 @@ function autoPopulateChildren(parent, leafSelector) {
                     canvas_course_id: $('#canvas_structure').data('course_id'),
                     title: $(this).data('title'),
                     position: position++,
-                    graded: $(this).data("type") == "problem"
+                    graded: $(this).data("points") != 0 && createAssignments,
+                    points: $(this).data("points")
                 };
                 $.post("/lti_tools/edx2canvas/add_to_canvas", module_item_data).done(
                     function (response) {

@@ -38,6 +38,7 @@ def add_to_canvas(request):
         position = request.POST['position']
         usage_id = request.POST['usage_id']
         graded = request.POST['graded'].lower() not in ('false', '0')
+        points = request.POST['points']
         canvas_user_id = request.session['LTI_LAUNCH']['user_id']
     except KeyError:
         return HttpResponseBadRequest()
@@ -58,7 +59,8 @@ def add_to_canvas(request):
     if graded:
         canvas_api.create_assignment_with_module_item(
             canvas_auth, title, canvas_course_id, module_id, position,
-            external_tool_id, get_lti_url_for_usage_id(edx_course_key, usage_id)
+            external_tool_id, get_lti_url_for_usage_id(edx_course_key, usage_id),
+            points
         )
     else:
         canvas_api.create_canvas_module_item(
