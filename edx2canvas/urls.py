@@ -6,6 +6,7 @@ urlpatterns = patterns('',
     url(r'^main$', 'edx2canvas.views.main', name='main'),
     url(r'^canvas_modules$', 'edx2canvas.views.get_canvas_modules', name='canvas_modules'),
     url(r'^edx_course$', 'edx2canvas.views.get_edx_course', name='edx_course'),
+    url(r'^edx_course/new$', 'edx2canvas.views.create_edx_course', name='create_edx_course'),
     url(r'^tool_config$', 'edx2canvas.views.tool_config', name='tool_config'),
 
     url(r'^add_to_canvas$', 'edx2canvas.populate.add_to_canvas', name='add_to_canvas'),

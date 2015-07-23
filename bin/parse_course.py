@@ -1,63 +1,60 @@
 import argparse
 import json
 import os
+import requests
+import tempfile
 from xml.etree import ElementTree
 
-from django.core.management.base import BaseCommand, CommandError
+def main():
+    parser = argparse.ArgumentParser(description='Parse and upload an exported edX course.')
+    parser.add_argument(
+        'tar_file', type=argparse.FileType('r'),
+        help='The .tgz file containing the exported edX course.'
+    )
+    parser.add_argument(
+        'url_base',
+        help='Base of the server URL (eg "http://example.com/lti_tools/").'
+    )
+    args = parser.parse_args()
 
-from edx2canvas import models
+    tmp_dir = tempfile.mkdtemp()
+    os.system("tar -zxf {} -C {}".format(args.tar_file.name, tmp_dir))
+    root_dir = "{}/{}".format(tmp_dir, os.listdir(tmp_dir)[0])
+    parser = EdXMLParser(root_dir)
+    upload_course(parser, args.url_base)
 
-class Command(BaseCommand):
-    help = 'Parse an expanded edX course directory'
+    check_scores(parser.get_course())
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            'course_xml', type=argparse.FileType('r'),
-            help='The course.xml file at the root of the expanded edX course.'
-        )
 
-    def handle(self, *args, **options):
-        directory = os.path.dirname(options['course_xml'].name)
-        root = ElementTree.parse(options['course_xml']).getroot()
-        course = models.EdxCourse(
-            title='',
-            org=root.attrib['org'],
-            course=root.attrib['course'],
-            run=root.attrib['url_name'],
-            key_version=1
-        )
-        parsed_course = EdXMLParser(course, directory).get_course()
-        self.annotate_points(parsed_course)
-        course.title = parsed_course['display_name']
-        course.save()
-        parsed_course['id'] = course.id
-        with open("courses/{}.json".format(course.course), 'w') as jsonfile:
-            jsonfile.write(json.dumps(parsed_course, indent=4))
+def check_scores(node):
+    if 'children' not in node:
+        return
+    for child in node['children']:
+        if 'score' not in child:
+            print "No score in {}".format(child)
+        check_scores(child)
 
-    def annotate_points(self, dictionary):
-        if dictionary['type'] == 'problem':
-            if 'children' in dictionary:
-                dictionary['points'] = len(dictionary['children'])
-            else:
-                dictionary['points'] = 1
-            return dictionary['points']
-        if 'children' not in dictionary:
-            dictionary['points'] = 0
-            return 0
-        children_points = 0
-        for child in dictionary['children']:
-            children_points += self.annotate_points(child)
-        dictionary['points'] = children_points
-        return children_points
+def upload_course(parser, url_base):
+    data = dict(
+        title=parser.get_course()['display_name'],
+        org=parser.org,
+        course=parser.course,
+        run=parser.url_name,
+        key_version=1,
+        body=json.dumps(parser.get_course())
+    )
+    url = "{}/edx2canvas/edx_course/new".format(url_base)
+    headers = {'Content-Type': 'application/json'}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+    if r.status_code == 201:
+        print "Successfully uploaded course {}".format(data['title'])
+    else:
+        print "Error uploading {}: {}".format(data['title'], r)
 
-class EdXMLParser():
-    def __init__(self, edx_course, directory):
-        self.edx_course = edx_course
+class EdXMLParser:
+    def __init__(self, directory):
         self.parsed_course = None
         self.directory = directory
-        self.course_id = edx_course.run
-        self.course_path = edx_course.run
-        self.usage_prefix = "{}/{}".format(edx_course.org, edx_course.course)
 
     def get_course(self):
         if not self.parsed_course:
@@ -65,7 +62,7 @@ class EdXMLParser():
         return self.parsed_course
 
     def _populate_attributes(self, root, parent_id):
-        content = {'type': root.tag}
+        content = {'type': root.tag, 'score': 0}
         if parent_id:
             content['parent'] = parent_id
         for attr in root.attrib:
@@ -85,22 +82,32 @@ class EdXMLParser():
             child_parser = getattr(EdXMLParser, '_parse_' + child.tag)
             # child_parser = inspect.getmembers(self)['_parse_' + child.tag]
             content['children'] = content.get('children', [])
-            content['children'].append(child_parser(self, child, instance_id))
+            child = child_parser(self, child, instance_id)
+            content['children'].append(child)
+            content['score'] = content['score'] + child['score']
         return content
 
     def _calculate_usage_id(self, instance_id, label):
         # return "i4x:;_;_{};_{};_{}".format(self.usage_prefix.replace('/', ';_'), label, instance_id)
         return "block-v1:{}+{}+{}+type@{}+block@{}".format(
-            self.edx_course.org,
-            self.edx_course.course,
-            self.edx_course.run,
+            self.org,
+            self.course,
+            self.url_name,
             label,
             instance_id
         )
 
+    def _parse_course_xml(self):
+        file_name = "{}/course.xml".format(self.directory)
+        root = ElementTree.parse(file_name).getroot()
+        self.url_name = root.attrib.get('url_name')
+        self.course = root.attrib.get('course')
+        self.org = root.attrib.get('org')
+
+
     def _parse_course(self):
-        self.parsed_course = self._parse_structure('course', self.course_id)
-        self.parsed_course['id'] = self.edx_course.id
+        self._parse_course_xml()
+        self.parsed_course = self._parse_structure('course', self.url_name)
 
     def _parse_chapter(self, element, parent_id):
         instance_id = element.attrib.get('url_name')
@@ -146,6 +153,7 @@ class EdXMLParser():
         # print "Display name: {}".format(element.attrib.get('display_name'))
         if element.attrib.get('display_name'):
             content = self._populate_attributes(element, parent_id)
+            content['score'] = 1
         else:
             instance_id = element.attrib.get('url_name')
             file_name = "{}/problem/{}.xml".format(self.directory, instance_id)
@@ -153,6 +161,19 @@ class EdXMLParser():
             content = self._populate_attributes(root, parent_id)
             content['id'] = instance_id
             content['usage_id'] = self._calculate_usage_id(content['id'], 'problem')
+            score = 0
+            score += len(root.findall('.//coderesponse'))
+            score += len(root.findall('.//choiceresponse'))
+            score += len(root.findall('.//customresponse'))
+            score += len(root.findall('.//formularesponse'))
+            score += len(root.findall('.//imageresponse'))
+            score += len(root.findall('.//jsmeresponse'))
+            score += len(root.findall('.//multiplechoiceresponse'))
+            score += len(root.findall('.//numericalresponse'))
+            score += len(root.findall('.//optionresponse'))
+            score += len(root.findall('.//schematicresponse'))
+            score += len(root.findall('.//stringresponse'))
+            content['score'] = score if score else 1
         return content
 
     def _parse_discussion(self, element, parent_id):
@@ -175,6 +196,7 @@ class EdXMLParser():
                 'id': instance_id,
                 'usage_id': self._calculate_usage_id(instance_id, 'annotatable'),
                 'parent': parent_id,
+                'score': 0,
                 'body': html_file.read()
             }
 
@@ -201,3 +223,6 @@ class EdXMLParser():
         content['id'] = element.attrib.get('url_name')
         content['usage_id'] = self._calculate_usage_id(content['id'], 'textannotation')
         return content
+
+
+main()

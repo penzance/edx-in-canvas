@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from ims_lti_py.tool_config import ToolConfig
 import django.http as http
 from models import CanvasApiAuthorization, EdxCourse
@@ -131,8 +132,35 @@ def get_edx_course(request):
     except EdxCourse.DoesNotExist:
         return http.HttpResponseNotFound()
     try:
-        with open("courses/{}.json".format(edx_course.course)) as infile:
+        with open("courses/{}.json".format(course_id)) as infile:
             parsed = json.load(infile)
             return http.JsonResponse(parsed, safe=False)
     except IOError:
         return http.HttpResponseNotFound()
+
+
+@require_http_methods(['POST'])
+def create_edx_course(request):
+    try:
+        data = json.loads(request.body)
+        title = data['title']
+        org = data['org']
+        course = data['course']
+        run = data['run']
+        key_version = data['key_version']
+        body = json.loads(data['body'])
+
+        edx_course, __ = EdxCourse.objects.get_or_create(
+            title=title,
+            org=org,
+            course=course,
+            run=run,
+            key_version=key_version
+        )
+        with open("courses/{}.json".format(edx_course.id), 'w') as outfile:
+            outfile.write(json.dumps(body, indent=4))
+
+    except Exception as e:
+        print "{}".format(e)
+        return http.HttpResponseBadRequest()
+    return HttpResponse(status=201)
