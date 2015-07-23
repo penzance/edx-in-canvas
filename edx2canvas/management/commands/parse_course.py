@@ -36,8 +36,11 @@ class Command(BaseCommand):
 
     def annotate_points(self, dictionary):
         if dictionary['type'] == 'problem':
-            dictionary['points'] = 1
-            return 1
+            if 'children' in dictionary:
+                dictionary['points'] = len(dictionary['children'])
+            else:
+                dictionary['points'] = 1
+            return dictionary['points']
         if 'children' not in dictionary:
             dictionary['points'] = 0
             return 0
