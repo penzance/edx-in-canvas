@@ -152,7 +152,8 @@ function moduleDragged(evt) {
         canvas_course_id: $('#canvas_structure').data('course_id'),
         title: $(evt.item).data("title"),
         position: evt.newIndex + 1,
-        graded: $(evt.item).data("type") == "problem"
+        graded: $(evt.item).data("type") == "problem",
+        points: $(evt.item).data("points")
     };
     evt.item.innerText = "Adding to Canvas...";
     $.post("/lti_tools/edx2canvas/add_to_canvas", data).done(
