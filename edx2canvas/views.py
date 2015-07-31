@@ -134,6 +134,7 @@ def get_edx_course(request):
     try:
         with open("courses/{}.json".format(course_id)) as infile:
             parsed = json.load(infile)
+            parsed['id'] = course_id
             return http.JsonResponse(parsed, safe=False)
     except IOError:
         return http.HttpResponseNotFound()

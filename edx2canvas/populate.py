@@ -38,10 +38,11 @@ def add_to_canvas(request):
         position = request.POST['position']
         usage_id = request.POST['usage_id']
         graded = request.POST['graded'].lower() not in ('false', '0')
-        points = request.POST['points']
+        if graded:
+            points = request.POST['points']
         canvas_user_id = request.session['LTI_LAUNCH']['user_id']
-    except KeyError:
-        return HttpResponseBadRequest()
+    except KeyError as e:
+        return HttpResponseBadRequest(e)
 
     try:
         edx_course = EdxCourse.objects.get(id=edx_course_id)
