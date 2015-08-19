@@ -40,9 +40,7 @@ path.append(SITE_ROOT)
 SECRET_KEY = SECURE_SETTINGS.get('django_secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = SECURE_SETTINGS.get('enable_debug', False)
-
-TEMPLATE_DEBUG = True
+TEMPLATE_DEBUG = SECURE_SETTINGS.get('enable_debug', False)
 
 ALLOWED_HOSTS = []
 
@@ -126,8 +124,6 @@ TEMPLATE_DIRS = (
     normpath(join(SITE_ROOT, 'templates')),
 )
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 # Logging
 _DEFAULT_LOG_LEVEL = SECURE_SETTINGS.get('log_level', 'DEBUG')
 _LOG_ROOT = SECURE_SETTINGS.get('log_root', '')
@@ -165,12 +161,11 @@ LOGGING = {
         'handlers': ['default'],
     },
     'loggers': {
-        # Add app specific loggers here, should look something like this:
-        # '{{ app_name }}': {
-        #    'level': _DEFAULT_LOG_LEVEL,
-        #    'handlers': ['default'],
-        #    'propagate': False,
-        # },
+        'edx2canvas': {
+            'handlers': ['console', 'app_logfile'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
