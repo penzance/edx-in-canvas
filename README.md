@@ -36,6 +36,7 @@ it will be available in the edX content menu on the top left of the app display.
 Once you have deployed the tool you can find the configuration XML required by Canvas at the edx2canvas/tool_config
 endpoint. The exact URL will depend on your deployment environment. Assuming that the URL for that endpoint is:
 > https://example.com/edx_lti_authoring/edx2canvas/tool_config
+
 you can install the tool using the XML configuration option in Canvas.
 
 The other thing that you will have to do is contact your Canvas administrator to obtain an App ID and secret
