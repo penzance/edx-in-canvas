@@ -39,8 +39,30 @@ path.append(SITE_ROOT)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = SECURE_SETTINGS.get('django_secret_key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-TEMPLATE_DEBUG = SECURE_SETTINGS.get('enable_debug', False)
+DEBUG = SECURE_SETTINGS.get('enable_debug', False)
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            normpath(join(SITE_ROOT, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+            'debug': DEBUG,
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
+        },
+    },
+]
 
 ALLOWED_HOSTS = []
 
@@ -115,14 +137,6 @@ STATICFILES_DIRS = (
     normpath(join(SITE_ROOT, 'static')),
 )
 STATIC_ROOT = normpath(join(SITE_ROOT, 'http_static'))
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-TEMPLATE_DIRS = (
-    normpath(join(SITE_ROOT, 'templates')),
-)
 
 # Logging
 _DEFAULT_LOG_LEVEL = SECURE_SETTINGS.get('log_level', 'DEBUG')
@@ -162,8 +176,8 @@ LOGGING = {
     },
     'loggers': {
         'edx2canvas': {
-            'handlers': ['console', 'app_logfile'],
-            'level': 'DEBUG',
+            'handlers': ['default'],
+            'level': _DEFAULT_LOG_LEVEL,
             'propagate': False,
         },
     },
