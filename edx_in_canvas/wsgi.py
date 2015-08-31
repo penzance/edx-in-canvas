@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "edx-in-canvas.settings.aws")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "edx_in_canvas.settings.aws")
 
 application = get_wsgi_application()
