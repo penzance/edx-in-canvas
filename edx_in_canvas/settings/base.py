@@ -44,9 +44,7 @@ DEBUG = SECURE_SETTINGS.get('enable_debug', False)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            normpath(join(SITE_ROOT, 'templates'),
-        ],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
