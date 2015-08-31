@@ -96,9 +96,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 LOGIN_URL = reverse_lazy('lti_auth_error')
 
-ROOT_URLCONF = 'edx-in-canvas.urls'
+ROOT_URLCONF = 'edx_in_canvas.urls'
 
-WSGI_APPLICATION = 'edx-in-canvas.wsgi.application'
+WSGI_APPLICATION = 'edx_in_canvas.wsgi.application'
 
 
 # Database
