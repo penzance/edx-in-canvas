@@ -39,10 +39,30 @@ path.append(SITE_ROOT)
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = SECURE_SETTINGS.get('django_secret_key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = SECURE_SETTINGS.get('enable_debug', False)
 
-TEMPLATE_DEBUG = True
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            normpath(join(SITE_ROOT, 'templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+            'debug': DEBUG,
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ]
+        },
+    },
+]
 
 ALLOWED_HOSTS = []
 
@@ -76,9 +96,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 LOGIN_URL = reverse_lazy('lti_auth_error')
 
-ROOT_URLCONF = 'edx_lti_authoring.urls'
+ROOT_URLCONF = 'edx-in-canvas.urls'
 
-WSGI_APPLICATION = 'edx_lti_authoring.wsgi.application'
+WSGI_APPLICATION = 'edx-in-canvas.wsgi.application'
 
 
 # Database
@@ -117,16 +137,51 @@ STATICFILES_DIRS = (
     normpath(join(SITE_ROOT, 'static')),
 )
 STATIC_ROOT = normpath(join(SITE_ROOT, 'http_static'))
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-TEMPLATE_DIRS = (
-    normpath(join(SITE_ROOT, 'templates')),
-)
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Logging
+_DEFAULT_LOG_LEVEL = SECURE_SETTINGS.get('log_level', 'DEBUG')
+_LOG_ROOT = SECURE_SETTINGS.get('log_root', '')
+# Turn off default Django logging
+# https://docs.djangoproject.com/en/1.8/topics/logging/#disabling-logging-configuration
+LOGGING_CONFIG = None
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s\t%(asctime)s.%(msecs)03dZ\t%(name)s:%(lineno)s\t%(message)s',
+            'datefmt': '%Y-%m-%dT%H:%M:%S'
+        },
+        'simple': {
+            'format': '%(levelname)s\t%(name)s:%(lineno)s\t%(message)s',
+        },
+    },
+    'handlers': {
+        'default': {
+            'class': 'logging.handlers.WatchedFileHandler',
+            'level': _DEFAULT_LOG_LEVEL,
+            'formatter': 'verbose',
+            'filename': os.path.join(_LOG_ROOT, 'django-canvas_integration.log'),
+        },
+    },
+    # This is the default logger for any apps or libraries that use the logger
+    # package, but are not represented in the `loggers` dict below.  A level
+    # must be set and handlers defined.  Setting this logger is equivalent to
+    # setting and empty string logger in the loggers dict below, but the separation
+    # here is a bit more explicit.  See link for more details:
+    # https://docs.python.org/2.7/library/logging.config.html#dictionary-schema-details
+    'root': {
+        'level': logging.WARNING,
+        'handlers': ['default'],
+    },
+    'loggers': {
+        'edx2canvas': {
+            'handlers': ['default'],
+            'level': _DEFAULT_LOG_LEVEL,
+            'propagate': False,
+        },
+    },
+}
 
 LTI_OAUTH_CREDENTIALS = SECURE_SETTINGS.get('lti_oauth_credentials', None)
 
