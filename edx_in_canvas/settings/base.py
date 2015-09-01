@@ -169,7 +169,7 @@ LOGGING = {
     # here is a bit more explicit.  See link for more details:
     # https://docs.python.org/2.7/library/logging.config.html#dictionary-schema-details
     'root': {
-        'level': WARNING,
+        'level': _DEFAULT_LOG_LEVEL,
         'handlers': ['default'],
     },
     'loggers': {
