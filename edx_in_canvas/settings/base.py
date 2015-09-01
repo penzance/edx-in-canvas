@@ -125,7 +125,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = '/lti_tools/static/'
+STATIC_URL = '/edx_in_canvas/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
