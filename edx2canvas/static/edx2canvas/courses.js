@@ -15,7 +15,7 @@ $(document).ready(function () {
 function initializeEdxCourseSelector() {
     $('#edx_class_selector li').on('click', function () {
         var data = {edx_course_id: $(this).data("id")};
-        $.get("/lti_tools/edx2canvas/edx_course", data).done(
+        $.get("/edx2canvas/edx_course", data).done(
             function (data) {
                 var dropdownText = data['display_name'];
                 dropdownText = dropdownText.length > 35 ? dropdownText.substr(0, 34) + '...' : dropdownText;
@@ -140,7 +140,7 @@ function updateLtiFrame(element) {
     var course_id = encodeURIComponent(element.data("course_id"));
     console.log("Usage: " + usage_id + ", course: " + course_id);
     $("#lti_iframe").addClass("lti_iframe_expanded");
-    $("#lti_iframe").attr("src", "/lti_tools/edx2canvas/lti_preview?usage_id=" + usage_id + "&course_id=" + course_id)
+    $("#lti_iframe").attr("src", "/edx2canvas/lti_preview?usage_id=" + usage_id + "&course_id=" + course_id)
 }
 
 function moduleDragged(evt) {
@@ -156,14 +156,14 @@ function moduleDragged(evt) {
         points: $(evt.item).data("points")
     };
     evt.item.innerText = "Adding to Canvas...";
-    $.post("/lti_tools/edx2canvas/add_to_canvas", data).done(
+    $.post("/edx2canvas/add_to_canvas", data).done(
         function (data) {
             populateCanvasCourse(data, selected, true)
         });
 }
 
 function addToCanvas(data) {
-    $.post("/lti_tools/edx2canvas/add_to_canvas", data).done(
+    $.post("/edx2canvas/add_to_canvas", data).done(
         function (data) {
             populateCanvasCourse(data, null, true)
         });
@@ -214,7 +214,7 @@ function autoPopulate(leafSelector, createAssignments) {
             };
             $.ajax({
                 type: "POST",
-                url: "/lti_tools/edx2canvas/create_canvas_module",
+                url: "/edx2canvas/create_canvas_module",
                 data: module_data,
                 success: autoPopulateChildren($(this), leafSelector, createAssignments)
             });
@@ -242,7 +242,7 @@ function autoPopulateChildren(parent, leafSelector, createAssignments) {
                     graded: $(this).data("points") != 0 && createAssignments,
                     points: $(this).data("points")
                 };
-                $.post("/lti_tools/edx2canvas/add_to_canvas", module_item_data).done(
+                $.post("/edx2canvas/add_to_canvas", module_item_data).done(
                     function (response) {
                         updateProcess()
                         populateCanvasCourse(response, '.canvas-collapse', false);
