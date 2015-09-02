@@ -152,7 +152,7 @@ LOGGING = {
             'class': 'logging.handlers.WatchedFileHandler',
             'level': _DEFAULT_LOG_LEVEL,
             'formatter': 'verbose',
-            'filename': os.path.join(_LOG_ROOT, 'django-canvas_integration.log'),
+            'filename': os.path.join(_LOG_ROOT, 'django-edx_in_canvas.log'),
         },
     },
     # This is the default logger for any apps or libraries that use the logger
