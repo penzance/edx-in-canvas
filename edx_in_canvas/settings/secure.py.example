@@ -1,0 +1,26 @@
+# Replace the {{ }} tokens with the correct values for your environment
+# and copy this file to secure.py
+
+SECURE_SETTINGS = {
+    'canvas_domain': '{{ secure_settings.canvas_domain }}',
+    'external_tool_domain': '{{ secure_settings.external_tool_domain }}',
+    'db_default_name': '{{ secure_settings.db_default_name }}',
+    'db_default_user': '{{ secure_settings.db_default_user }}',
+    'db_default_password': '{{ secure_settings.db_default_password }}',
+    'django_secret_key': '{{ secure_settings.django_secret_key }}',
+    'lti_oauth_credentials': '{{ secure_settings.lti_oauth_credentials }}',
+    'admins': (
+        ('Admin User', 'admin_user@example.com'),
+    ),
+    'edx_url_base': '{{ secure_settings.edx_url_base }}',
+    'edx_lti_provider_key': '{{ secure_settings.edx_lti_provider_key }}',
+    'edx_lti_provider_secret': '{{ secure_settings.edx_lti_provider_secret }}',
+
+    'preview_tool_consumer_guid': '{{ secure_settings.preview_tool_consumer_guid }}',
+    'preview_user_id': '{{ secure_settings.preview_user_id }}',
+    'edx_lti_preview_key': '{{ secure_settings.preview_key }}',
+    'edx_lti_preview_secret': '{{ secure_settings.preview_secret }}',
+
+    'canvas_oauth_client_id': '{{ secure_settings.oauth_client_id }}',
+    'canvas_oauth_client_key': '{{ secure_settings.oauth_client_secret }}'
+}

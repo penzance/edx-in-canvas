@@ -1,5 +1,5 @@
 import json
-
+import logging
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,7 @@ import canvas_api
 
 TOOL_NAME = "edx2canvas"
 
+log = logging.getLogger("edx2canvas.log")
 
 @require_http_methods(['GET'])
 def tool_config(request):
@@ -162,6 +163,6 @@ def create_edx_course(request):
             outfile.write(json.dumps(body, indent=4))
 
     except Exception as e:
-        print "{}".format(e)
+        log.info("{}".format(e))
         return http.HttpResponseBadRequest()
     return HttpResponse(status=201)

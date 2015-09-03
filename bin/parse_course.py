@@ -13,7 +13,7 @@ def main():
     )
     parser.add_argument(
         'url_base',
-        help='Base of the server URL (eg "http://example.com/lti_tools/").'
+        help='Base of the server URL (eg "http://example.com/").'
     )
     args = parser.parse_args()
 
