@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse_lazy
 from sys import path
 from .secure import SECURE_SETTINGS
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Absolute filesystem path to the Django project config directory:
 # (this is the parent of the directory where this file resides,
@@ -128,6 +128,14 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.normpath(os.path.join(BASE_DIR, 'http_static'))
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.normpath(os.path.join(BASE_DIR, 'static')),
+)
 
 # Logging
 _DEFAULT_LOG_LEVEL = SECURE_SETTINGS.get('log_level', 'DEBUG')
