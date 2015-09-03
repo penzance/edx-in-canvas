@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse_lazy
 from sys import path
 from .secure import SECURE_SETTINGS
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Absolute filesystem path to the Django project config directory:
 # (this is the parent of the directory where this file resides,
@@ -54,10 +54,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'debug': DEBUG,
-            'loaders': [
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ]
         },
     },
 ]
@@ -65,7 +61,7 @@ TEMPLATES = [
 ALLOWED_HOSTS = []
 
 
-# Application definition
+# Application definitions
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -104,8 +100,12 @@ WSGI_APPLICATION = 'edx_in_canvas.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': SECURE_SETTINGS.get('db_default_name', 'edx_in_canvas'),
+        'USER': SECURE_SETTINGS.get('db_default_user', 'postgres'),
+        'PASSWORD': SECURE_SETTINGS.get('db_default_password'),
+        'HOST': SECURE_SETTINGS.get('db_default_host', '127.0.0.1'),
+        'PORT': SECURE_SETTINGS.get('db_default_port', 5432),  # Default postgres port
     }
 }
 
@@ -125,16 +125,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = '/lti_tools/static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.normpath(os.path.join(BASE_DIR, 'http_static'))
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    normpath(join(SITE_ROOT, 'static')),
+    os.path.normpath(os.path.join(BASE_DIR, 'static')),
 )
-STATIC_ROOT = normpath(join(SITE_ROOT, 'http_static'))
 
 # Logging
 _DEFAULT_LOG_LEVEL = SECURE_SETTINGS.get('log_level', 'DEBUG')
@@ -159,7 +160,7 @@ LOGGING = {
             'class': 'logging.handlers.WatchedFileHandler',
             'level': _DEFAULT_LOG_LEVEL,
             'formatter': 'verbose',
-            'filename': os.path.join(_LOG_ROOT, 'django-canvas_integration.log'),
+            'filename': os.path.join(_LOG_ROOT, 'django-edx_in_canvas.log'),
         },
     },
     # This is the default logger for any apps or libraries that use the logger
@@ -169,7 +170,7 @@ LOGGING = {
     # here is a bit more explicit.  See link for more details:
     # https://docs.python.org/2.7/library/logging.config.html#dictionary-schema-details
     'root': {
-        'level': logging.WARNING,
+        'level': _DEFAULT_LOG_LEVEL,
         'handlers': ['default'],
     },
     'loggers': {
