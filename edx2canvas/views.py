@@ -174,9 +174,9 @@ def create_edx_course(request):
             log.info("writing file to s3")
             conn = S3Connection()
             courses_bucket = conn.get_bucket(courses_bucket_name)
+            log.info("Got here.")
             path = getattr(settings, 'COURSES_FOLDER', None)
             full_key_name = os.path.join(path, output_filename)
-            log.info("huh")
             k = Key(courses_bucket)
             k.key = full_key_name
             k.content_type = 'text/html'
