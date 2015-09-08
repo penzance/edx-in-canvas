@@ -10,6 +10,9 @@ import django.http as http
 from models import CanvasApiAuthorization, EdxCourse
 from canvas_sdk.exceptions import CanvasAPIError
 import canvas_api
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+from django.conf import settings
 
 TOOL_NAME = "edx2canvas"
 
@@ -159,8 +162,29 @@ def create_edx_course(request):
             run=run,
             key_version=key_version
         )
-        with open("courses/{}.json".format(edx_course.id), 'w') as outfile:
-            outfile.write(json.dumps(body, indent=4))
+
+        output_filename = '%s.json' % edx_course.id
+        output = json.dumps(body, indent=4)
+
+        utf8_output = output.encode('utf-8')
+        courses_bucket_name = getattr(settings, 'COURSES_BUCKET', None)
+        if courses_bucket_name:
+            # get the bucket
+            log.info("writing file to s3")
+            conn = S3Connection()
+            courses_bucket = conn.get_bucket(courses_bucket_name)
+            k = Key(courses_bucket)
+            k.key = '%s/%s' % (getattr(settings, 'COURSES_FOLDER', None) , output_filename)
+            k.content_type = 'text/html'
+            k.content_encoding = 'UTF-8'
+            k.set_contents_from_string(utf8_output)
+            k.close()
+
+        else:
+            log.info("writing file locally")
+            outfile = open(output_filename, 'w+')
+            outfile.write(utf8_output)
+            outfile.close()
 
     except Exception as e:
         log.info("{}".format(e))

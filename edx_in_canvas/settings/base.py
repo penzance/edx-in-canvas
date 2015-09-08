@@ -211,3 +211,6 @@ EDX_LTI_SECRET = SECURE_SETTINGS.get('edx_lti_provider_secret', None)
 
 CANVAS_OAUTH_CLIENT_ID = SECURE_SETTINGS.get('canvas_oauth_client_id', None)
 CANVAS_OAUTH_CLIENT_KEY = SECURE_SETTINGS.get('canvas_oauth_client_key', None)
+
+COURSES_BUCKET = SECURE_SETTINGS.get('courses_bucket', None)
+COURSES_FOLDER = SECURE_SETTINGS.get('courses_folder', 'dev')
