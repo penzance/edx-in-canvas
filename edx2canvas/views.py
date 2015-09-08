@@ -13,6 +13,7 @@ import canvas_api
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.conf import settings
+from sys import os
 
 TOOL_NAME = "edx2canvas"
 
@@ -173,8 +174,9 @@ def create_edx_course(request):
             log.info("writing file to s3")
             conn = S3Connection()
             courses_bucket = conn.get_bucket(courses_bucket_name)
-            k = Key(courses_bucket)
-            k.key = '%s/%s' % (getattr(settings, 'COURSES_FOLDER', None) , output_filename)
+            path = getattr(settings, 'COURSES_FOLDER', None)
+            full_key_name = os.path.join(path, output_filename)
+            k = courses_bucket.new_key(full_key_name)
             k.content_type = 'text/html'
             k.content_encoding = 'UTF-8'
             k.set_contents_from_string(utf8_output)
