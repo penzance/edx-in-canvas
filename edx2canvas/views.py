@@ -137,6 +137,7 @@ def get_edx_course(request):
     except EdxCourse.DoesNotExist:
         return http.HttpResponseNotFound()
     try:
+        # TODO Improve logging, especially for S3 functionality
         input_filename = '%s.json' % course_id
 
         courses_bucket_name = getattr(settings, 'COURSES_BUCKET', None)
@@ -148,7 +149,7 @@ def get_edx_course(request):
         full_key_name = os.path.join(path, input_filename)
         k = Key(courses_bucket)
         k.key = full_key_name
-        k.content_type = 'text/html'
+        k.content_type = 'application/json'
         k.content_encoding = 'UTF-8'
         parsed = json.loads(k.get_contents_as_string())
         k.close()
@@ -178,6 +179,7 @@ def create_edx_course(request):
             key_version=key_version
         )
 
+        # TODO Improve logging, especially for S3 functionality
         output_filename = '%s.json' % edx_course.id
         output = json.dumps(body, indent=4)
 
@@ -191,7 +193,7 @@ def create_edx_course(request):
         full_key_name = os.path.join(path, output_filename)
         k = Key(courses_bucket)
         k.key = full_key_name
-        k.content_type = 'text/html'
+        k.content_type = 'application/json'
         k.content_encoding = 'UTF-8'
         k.set_contents_from_string(utf8_output)
         k.close()
