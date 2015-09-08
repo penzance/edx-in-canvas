@@ -13,7 +13,7 @@ import canvas_api
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from django.conf import settings
-from sys import os
+import os
 
 TOOL_NAME = "edx2canvas"
 
