@@ -140,21 +140,20 @@ def get_edx_course(request):
         input_filename = '%s.json' % course_id
 
         courses_bucket_name = getattr(settings, 'COURSES_BUCKET', None)
-        if courses_bucket_name:
-            # get the bucket
-            log.info("reading file from s3")
-            conn = S3Connection()
-            courses_bucket = conn.get_bucket(courses_bucket_name)
-            path = getattr(settings, 'COURSES_FOLDER', None)
-            full_key_name = os.path.join(path, input_filename)
-            k = Key(courses_bucket)
-            k.key = full_key_name
-            k.content_type = 'text/html'
-            k.content_encoding = 'UTF-8'
-            parsed = json.loads(k.get_contents_as_string())
-            k.close()
-            parsed['id'] = course_id
-            return http.JsonResponse(parsed, safe=False)
+        # get the bucket
+        log.info("reading file from s3")
+        conn = S3Connection()
+        courses_bucket = conn.get_bucket(courses_bucket_name)
+        path = getattr(settings, 'COURSES_FOLDER', None)
+        full_key_name = os.path.join(path, input_filename)
+        k = Key(courses_bucket)
+        k.key = full_key_name
+        k.content_type = 'text/html'
+        k.content_encoding = 'UTF-8'
+        parsed = json.loads(k.get_contents_as_string())
+        k.close()
+        parsed['id'] = course_id
+        return http.JsonResponse(parsed, safe=False)
 
     except IOError:
         return http.HttpResponseNotFound()
@@ -184,25 +183,18 @@ def create_edx_course(request):
 
         utf8_output = output.encode('utf-8')
         courses_bucket_name = getattr(settings, 'COURSES_BUCKET', None)
-        if courses_bucket_name:
-            # get the bucket
-            log.info("writing file to s3")
-            conn = S3Connection()
-            courses_bucket = conn.get_bucket(courses_bucket_name)
-            path = getattr(settings, 'COURSES_FOLDER', None)
-            full_key_name = os.path.join(path, output_filename)
-            k = Key(courses_bucket)
-            k.key = full_key_name
-            k.content_type = 'text/html'
-            k.content_encoding = 'UTF-8'
-            k.set_contents_from_string(utf8_output)
-            k.close()
-
-        else:
-            log.info("writing file locally")
-            outfile = open(output_filename, 'w+')
-            outfile.write(utf8_output)
-            outfile.close()
+        # get the bucket
+        log.info("writing file to s3")
+        conn = S3Connection()
+        courses_bucket = conn.get_bucket(courses_bucket_name)
+        path = getattr(settings, 'COURSES_FOLDER', None)
+        full_key_name = os.path.join(path, output_filename)
+        k = Key(courses_bucket)
+        k.key = full_key_name
+        k.content_type = 'text/html'
+        k.content_encoding = 'UTF-8'
+        k.set_contents_from_string(utf8_output)
+        k.close()
 
     except Exception as e:
         log.info("{}".format(e))
