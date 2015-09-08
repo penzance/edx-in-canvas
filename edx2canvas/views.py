@@ -176,6 +176,7 @@ def create_edx_course(request):
             courses_bucket = conn.get_bucket(courses_bucket_name)
             path = getattr(settings, 'COURSES_FOLDER', None)
             full_key_name = os.path.join(path, output_filename)
+            log.info(full_key_name)
             k = Key(courses_bucket)
             k.key = full_key_name
             k.content_type = 'text/html'
