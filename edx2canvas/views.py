@@ -10,6 +10,10 @@ import django.http as http
 from models import CanvasApiAuthorization, EdxCourse
 from canvas_sdk.exceptions import CanvasAPIError
 import canvas_api
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+from django.conf import settings
+import os
 
 TOOL_NAME = "edx2canvas"
 
@@ -133,10 +137,25 @@ def get_edx_course(request):
     except EdxCourse.DoesNotExist:
         return http.HttpResponseNotFound()
     try:
-        with open("courses/{}.json".format(course_id)) as infile:
-            parsed = json.load(infile)
-            parsed['id'] = course_id
-            return http.JsonResponse(parsed, safe=False)
+        # TODO Improve logging, especially for S3 functionality
+        input_filename = '%s.json' % course_id
+
+        courses_bucket_name = getattr(settings, 'COURSES_BUCKET', None)
+        # get the bucket
+        log.info("reading file from s3")
+        conn = S3Connection()
+        courses_bucket = conn.get_bucket(courses_bucket_name)
+        path = getattr(settings, 'COURSES_FOLDER', None)
+        full_key_name = os.path.join(path, input_filename)
+        k = Key(courses_bucket)
+        k.key = full_key_name
+        k.content_type = 'application/json'
+        k.content_encoding = 'UTF-8'
+        parsed = json.loads(k.get_contents_as_string())
+        k.close()
+        parsed['id'] = course_id
+        return http.JsonResponse(parsed, safe=False)
+
     except IOError:
         return http.HttpResponseNotFound()
 
@@ -159,8 +178,25 @@ def create_edx_course(request):
             run=run,
             key_version=key_version
         )
-        with open("courses/{}.json".format(edx_course.id), 'w') as outfile:
-            outfile.write(json.dumps(body, indent=4))
+
+        # TODO Improve logging, especially for S3 functionality
+        output_filename = '%s.json' % edx_course.id
+        output = json.dumps(body, indent=4)
+
+        utf8_output = output.encode('utf-8')
+        courses_bucket_name = getattr(settings, 'COURSES_BUCKET', None)
+        # get the bucket
+        log.info("writing file to s3")
+        conn = S3Connection()
+        courses_bucket = conn.get_bucket(courses_bucket_name)
+        path = getattr(settings, 'COURSES_FOLDER', None)
+        full_key_name = os.path.join(path, output_filename)
+        k = Key(courses_bucket)
+        k.key = full_key_name
+        k.content_type = 'application/json'
+        k.content_encoding = 'UTF-8'
+        k.set_contents_from_string(utf8_output)
+        k.close()
 
     except Exception as e:
         log.info("{}".format(e))
