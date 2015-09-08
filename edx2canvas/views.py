@@ -151,7 +151,7 @@ def get_edx_course(request):
             k.key = full_key_name
             k.content_type = 'text/html'
             k.content_encoding = 'UTF-8'
-            parsed = json.load(k.get_contents_as_string())
+            parsed = json.loads(k.get_contents_as_string())
             k.close()
             parsed['id'] = course_id
             return http.JsonResponse(parsed, safe=False)
