@@ -22,8 +22,14 @@ def main():
     root_dir = "{}/{}".format(tmp_dir, os.listdir(tmp_dir)[0])
     parser = EdXMLParser(root_dir)
     upload_course(parser, args.url_base)
-
-    check_scores(parser.get_course())
+    settings = """
+    Edx course settings:
+        Course Name:   {}
+        Organization:  {}
+        Course Number: {}
+        CourseRun:     {}
+    """.format(parser.get_course()['display_name'], parser.org, parser.course, parser.url_name)
+    print settings
 
 
 def check_scores(node):
