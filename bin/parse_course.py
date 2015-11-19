@@ -242,4 +242,16 @@ class EdXMLParser:
         content['usage_id'] = self._calculate_usage_id(content['id'], 'lti')
         return content
 
+    def _parse_split_test(self, element, parent_id):
+        content = self._populate_attributes(element, parent_id)
+        content['id'] = element.attrib.get('url_name')
+        content['usage_id'] = self._calculate_usage_id(content['id'], 'split_test')
+        return content
+
+    def _parse_transcript(self, element, parent_id):
+        content = self._populate_attributes(element, parent_id)
+        content['id'] = element.attrib.get('url_name')
+        content['usage_id'] = self._calculate_usage_id(content['id'], 'transcript')
+        return content
+
 main()
