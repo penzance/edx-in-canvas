@@ -230,5 +230,16 @@ class EdXMLParser:
         content['usage_id'] = self._calculate_usage_id(content['id'], 'textannotation')
         return content
 
+    def _parse_track(self, element, parent_id):
+        content = self._populate_attributes(element, parent_id)
+        content['id'] = element.attrib.get('url_name')
+        content['usage_id'] = self._calculate_usage_id(content['id'], 'track')
+        return content
+
+    def _parse_lti(self, element, parent_id):
+        content = self._populate_attributes(element, parent_id)
+        content['id'] = element.attrib.get('url_name')
+        content['usage_id'] = self._calculate_usage_id(content['id'], 'lti')
+        return content
 
 main()
