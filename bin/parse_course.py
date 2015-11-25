@@ -75,25 +75,28 @@ class EdXMLParser:
             content[attr] = root.attrib.get(attr)
         return content
 
-    def _parse_structure(self, label, instance_id, parent_id=None):
+    def _parse_structure(self, label, instance_id, usage_id, parent_id=None):
         file_name = "{}/{}/{}.xml".format(self.directory, label, instance_id)
         root = ElementTree.parse(file_name).getroot()
         content = self._populate_attributes(root, parent_id)
         if instance_id:
-            usage_id = self._calculate_usage_id(instance_id, label)
             content['id'] = instance_id
             content['usage_id'] = usage_id
 
         for child in root:
-            child_parser = getattr(EdXMLParser, '_parse_' + child.tag)
-            # child_parser = inspect.getmembers(self)['_parse_' + child.tag]
+            try:
+                child_parser = getattr(EdXMLParser, '_parse_' + child.tag)
+            except AttributeError:
+                child_parser = getattr(EdXMLParser, '_parse_leaf')
             content['children'] = content.get('children', [])
-            child = child_parser(self, child, instance_id)
+            child = child_parser(self, child, instance_id, child.tag)
             content['children'].append(child)
             content['score'] = content['score'] + child['score']
         return content
 
     def _calculate_usage_id(self, instance_id, label):
+        # This method returns a usage ID for a split-mongo installation. For
+        # the mongo DB in the Devstack or Full Stack installations, use:
         # return "i4x:;_;_{};_{};_{}".format(self.usage_prefix.replace('/', ';_'), label, instance_id)
         return "block-v1:{}+{}+{}+type@{}+block@{}".format(
             self.org,
@@ -110,63 +113,38 @@ class EdXMLParser:
         self.course = root.attrib.get('course')
         self.org = root.attrib.get('org')
 
-
     def _parse_course(self):
         self._parse_course_xml()
-        self.parsed_course = self._parse_structure('course', self.url_name)
+        usage_id = self._calculate_usage_id(self.url_name, 'course')
+        self.parsed_course = self._parse_structure('course', self.url_name, usage_id)
 
-    def _parse_chapter(self, element, parent_id):
-        instance_id = element.attrib.get('url_name')
-        return self._parse_structure('chapter', instance_id=instance_id, parent_id=parent_id)
+    def _parse_chapter(self, element, parent_id, tag):
+        instance_id = self._get_instance_id(element)
+        usage_id = self._calculate_usage_id(element.attrib.get('url_name'), tag)
+        return self._parse_structure(tag, instance_id=instance_id, usage_id=usage_id, parent_id=parent_id)
 
-    def _parse_sequential(self, element, parent_id):
-        instance_id = element.attrib.get('url_name')
-        return self._parse_structure('sequential', instance_id=instance_id, parent_id=parent_id)
+    def _parse_sequential(self, element, parent_id, tag):
+        instance_id = self._get_instance_id(element)
+        usage_id = self._calculate_usage_id(element.attrib.get('url_name'), tag)
+        return self._parse_structure(tag, instance_id=instance_id, usage_id=usage_id, parent_id=parent_id)
 
-    def _parse_vertical(self, element, parent_id):
-        instance_id = element.attrib.get('url_name')
-        return self._parse_structure('vertical', instance_id=instance_id, parent_id=parent_id)
+    def _parse_vertical(self, element, parent_id, tag):
+        instance_id = self._get_instance_id(element)
+        usage_id = self._calculate_usage_id(element.attrib.get('url_name'), tag)
+        return self._parse_structure(tag, instance_id=instance_id, usage_id=usage_id, parent_id=parent_id)
 
-    def _parse_video(self, element, parent_id):
-        instance_id = element.attrib.get('url_name')
-        return self._parse_structure('video', instance_id=instance_id, parent_id=parent_id)
-
-    def _parse_source(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'source')
-        return content
-
-    def _parse_video_asset(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        video_content = []
-        for child in element:
-            video_content.append(self._populate_attributes(child, parent_id))
-        content['children'] = video_content
-        return content
-
-    def _parse_html(self, element, parent_id):
-        instance_id = element.attrib.get('url_name')
-        root = ElementTree.parse("{}/html/{}.xml".format(self.directory, instance_id)).getroot()
-        content = self._populate_attributes(root, parent_id)
-        with open("{}/html/{}.html".format(self.directory, instance_id)) as html_file:
-            content['id'] = instance_id
-            content['usage_id'] = self._calculate_usage_id(content['id'], 'html')
-            content['body'] = html_file.read()
-        return content
-
-    def _parse_problem(self, element, parent_id):
-        # print "Display name: {}".format(element.attrib.get('display_name'))
+    def _parse_problem(self, element, parent_id, tag):
         if element.attrib.get('display_name'):
             content = self._populate_attributes(element, parent_id)
             content['score'] = 1
         else:
-            instance_id = element.attrib.get('url_name')
+            instance_id = self._get_instance_id(element)
+            # instance_id = element.attrib.get('url_name')
             file_name = "{}/problem/{}.xml".format(self.directory, instance_id)
             root = ElementTree.parse(file_name).getroot()
             content = self._populate_attributes(root, parent_id)
             content['id'] = instance_id
-            content['usage_id'] = self._calculate_usage_id(content['id'], 'problem')
+            content['usage_id'] = self._calculate_usage_id(content['id'], tag)
             score = 0
             score += len(root.findall('.//coderesponse'))
             score += len(root.findall('.//choiceresponse'))
@@ -182,76 +160,16 @@ class EdXMLParser:
             content['score'] = score if score else 1
         return content
 
-    def _parse_discussion(self, element, parent_id):
+    def _parse_leaf(self, element, parent_id, tag):
         content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'discussion')
+        content['id'] = self._get_instance_id(element)
+        content['usage_id'] = self._calculate_usage_id(element.attrib.get('url_name'), tag)
         return content
 
-    def _parse_combinedopenended(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'combinedopenended')
-        return content
-
-    def _parse_annotatable(self, element, parent_id):
+    def _get_instance_id(self, element):
         instance_id = element.attrib.get('url_name')
-        with open("{}/annotatable/{}.xml".format(self.directory, instance_id)) as html_file:
-            return {
-                'type': 'annotatable',
-                'id': instance_id,
-                'usage_id': self._calculate_usage_id(instance_id, 'annotatable'),
-                'parent': parent_id,
-                'score': 0,
-                'body': html_file.read()
-            }
-
-    def _parse_wiki(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'wiki')
-        return content
-
-    def _parse_openassessment(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'openassessment')
-        return content
-
-    def _parse_poll_question(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'poll')
-        return content
-
-    def _parse_textannotation(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'textannotation')
-        return content
-
-    def _parse_track(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'track')
-        return content
-
-    def _parse_lti(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'lti')
-        return content
-
-    def _parse_split_test(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'split_test')
-        return content
-
-    def _parse_transcript(self, element, parent_id):
-        content = self._populate_attributes(element, parent_id)
-        content['id'] = element.attrib.get('url_name')
-        content['usage_id'] = self._calculate_usage_id(content['id'], 'transcript')
-        return content
+        if instance_id:
+            instance_id = instance_id.replace('.', '_')
+        return instance_id
 
 main()
