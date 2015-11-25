@@ -91,3 +91,5 @@ LOGGING = {
         },
     }
 }
+
+STORE_FILES_IN_S3 = False
