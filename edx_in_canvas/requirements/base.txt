@@ -1,4 +1,4 @@
-Django==1.8.17
+Django==1.8.16
 psycopg2==2.6.1
 ims_lti_py==0.6
 requests==2.7.0
